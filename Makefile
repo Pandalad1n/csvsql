@@ -1,3 +1,6 @@
+.PHONY: build
+build:
+	docker-compose build
 
 .PHONY: start
 start:
@@ -9,4 +12,4 @@ stop:
 
 .PHONY: test
 test:
-	docker-compose run app python app/test.py
+	docker-compose run app python app/test/run.py

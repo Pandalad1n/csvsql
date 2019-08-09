@@ -6,5 +6,7 @@ RUN apt-get update \
 
 WORKDIR /app
 
+ENV PYTHONPATH /app/app
+
 COPY requirements.txt .
 RUN pip install -r requirements.txt

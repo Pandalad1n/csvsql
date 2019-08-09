@@ -48,7 +48,3 @@ class TestDB(unittest.TestCase):
             c.execute("SELECT * FROM {}".format(name))
             resp = c.fetchall()
             self.assertEqual([r for r in rows], resp)
-
-
-if __name__ == '__main__':
-    unittest.main()
