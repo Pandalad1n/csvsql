@@ -18,7 +18,7 @@ def upload():
     if request.method == 'OPTIONS':
         return resp
     provider = CSVProvider(io.StringIO(request.data.decode("utf-8")))
-    with psycopg2.connect("user=postgres host=db password=1234 port=5432") as conn:
+    with psycopg2.connect(**settings.DB_CONFIG) as conn:
         processor = Processor(conn, "test", provider.columns(), provider.rows())
         processor.create()
         processor.insert()

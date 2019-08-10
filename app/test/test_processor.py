@@ -1,6 +1,6 @@
 import unittest
 import psycopg2
-
+import settings
 from processor import Processor
 
 
@@ -8,20 +8,20 @@ class TestDB(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestDB, self).__init__(*args, **kwargs)
 
-        self._initial_conn = psycopg2.connect("user=postgres host=db password=1234 port=5432")
+        self._initial_conn = psycopg2.connect(**settings.DB_CONFIG)
         self._initial_conn.autocommit = True
         self.conn = None
 
     def setUp(self):
         with self._initial_conn.cursor() as c:
-            c.execute("DROP DATABASE IF EXISTS test")
-            c.execute("CREATE DATABASE test")
-        self.conn = psycopg2.connect("dbname=test user=postgres host=db password=1234 port=5432")
+            c.execute("DROP DATABASE IF EXISTS {}".format(settings.TEST_DB_CONFIG['dbname']))
+            c.execute("CREATE DATABASE {}".format(settings.TEST_DB_CONFIG['dbname']))
+        self.conn = psycopg2.connect(**settings.TEST_DB_CONFIG)
 
     def tearDown(self):
         self.conn.close()
         with self._initial_conn.cursor() as c:
-            c.execute("DROP DATABASE test")
+            c.execute("DROP DATABASE {}".format(settings.TEST_DB_CONFIG['dbname']))
 
     def test_connection(self):
         with self.conn.cursor() as c:
