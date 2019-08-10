@@ -13,3 +13,11 @@ stop:
 .PHONY: test
 test:
 	docker-compose run app python app/test/run.py
+
+.PHONY: openapi
+openapi:
+	docker pull swaggerapi/swagger-ui
+	docker run \
+	    --network="host" \
+	    -e URL=http://localhost/swagger.yaml \
+	    swaggerapi/swagger-ui
