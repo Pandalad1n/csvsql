@@ -14,6 +14,10 @@ stop:
 test:
 	docker-compose run app python app/test/run.py
 
+.PHONY: dbshell
+dbshell:
+	docker-compose run app psql
+
 .PHONY: openapi
 openapi:
 	docker pull swaggerapi/swagger-ui

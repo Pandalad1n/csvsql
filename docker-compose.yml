@@ -6,11 +6,11 @@ services:
     volumes:
       - .:/app
     environment:
-      PG_PORT: 5432
-      PG_USER: postgres
-      PG_PASSWORD: 1234
-      PG_HOST: db
-      PG_DB: postgres
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: 1234
+      PGHOST: db
+      PGDATABASE: postgres
     depends_on:
       - db
     ports:
