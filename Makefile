@@ -4,7 +4,7 @@ build:
 
 .PHONY: start
 start:
-	docker-compose up -d
+	docker-compose up
 
 .PHONY: stop
 stop:

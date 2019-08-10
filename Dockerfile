@@ -7,6 +7,10 @@ RUN apt-get update \
 WORKDIR /app
 
 ENV PYTHONPATH /app/app
+ENV FLASK_APP /app/app/server.py
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
+
+CMD flask run --host 0.0.0.0 --port 80
+EXPOSE 80
