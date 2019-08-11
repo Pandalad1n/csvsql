@@ -15,3 +15,7 @@ paths:
             schema:
               type: string
               format: csv
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary

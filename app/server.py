@@ -1,6 +1,6 @@
 from flask import Flask, Response, request
 import settings
-from provider import CSVProvider
+from provider import CSVProvider, XlsxProvider
 import io
 from processor import Processor
 import psycopg2
@@ -17,7 +17,10 @@ def upload():
 
     if request.method == 'OPTIONS':
         return resp
-    provider = CSVProvider(io.StringIO(request.data.decode("utf-8")))
+    if request.headers['Content-Type'] == "text/csv":
+        provider = CSVProvider(io.StringIO(request.data.decode("utf-8")))
+    else:
+        provider = XlsxProvider(io.BytesIO(request.data))
     with psycopg2.connect(**settings.DB_CONFIG) as conn:
         processor = Processor(conn, "test", provider.columns(), provider.rows())
         processor.create()
