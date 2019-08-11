@@ -8,8 +8,8 @@ import psycopg2
 app = Flask(__name__)
 
 
-@app.route('/upload', methods=['OPTIONS', 'POST'])
-def upload():
+@app.route('/upload/<table_name>', methods=['OPTIONS', 'POST'])
+def upload(table_name):
     resp = Response()
     if settings.DEBUG:
         resp.headers['Access-Control-Allow-Origin'] = '*'
@@ -22,7 +22,7 @@ def upload():
     else:
         provider = XlsxProvider(io.BytesIO(request.data))
     with psycopg2.connect(**settings.DB_CONFIG) as conn:
-        processor = Processor(conn, "test", provider.columns(), provider.rows())
+        processor = Processor(conn, table_name, provider.columns(), provider.rows())
         processor.create()
         processor.insert()
 

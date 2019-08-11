@@ -3,9 +3,17 @@ info:
   version: 1.0.0
   title: CsvUpload
 paths:
-  /upload:
+  /upload/{table_name}:
     post:
       summary: post CSV
+      parameters:
+      - name: table_name
+        in: path
+        description: Table name
+        required: true
+        schema:
+          type: string
+          format: string
       responses:
         '200':
           description: Cvs load success
