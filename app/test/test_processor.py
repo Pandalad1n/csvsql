@@ -37,6 +37,20 @@ class TestDB(unittest.TestCase):
             resp_columns = c.fetchall()
             self.assertEqual([(c,) for c in columns], resp_columns)
 
+    def test_no_columns(self):
+        columns = ("banme", "mane", "lmene")
+        name = "bibia"
+        proc = Processor(self.conn, name, columns, [])
+        proc.create()
+
+        columns = columns + ("new",)
+        proc = Processor(self.conn, name, columns, [])
+        proc.create()
+        with self.conn.cursor() as c:
+            c.execute("SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '{}'".format(name))
+            resp_columns = c.fetchall()
+            self.assertEqual([(c,) for c in columns], resp_columns)
+
     def test_fills_data(self):
         columns = ("banme", "mane", "lmene")
         name = "bibia"
