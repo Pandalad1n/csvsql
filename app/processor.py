@@ -24,18 +24,19 @@ class Processor:
         """.format(self.name,)
         with self.connection.cursor() as c:
             c.execute(sql)
-            db_columns = c.fetchall()
-        for column in self.columns:
-            if (column,) not in db_columns:
-                sql = """
-                    ALTER TABLE {table_name}
-                    ADD COLUMN {column_sql} 
-                """.format(
-                    table_name=self.name,
-                    column_sql=self.column_type_sql(column),
-                )
-                with self.connection.cursor() as c:
-                    c.execute(sql)
+            db_columns = {c[0] for c in c.fetchall()}
+        new_columns = tuple(c for c in self.columns if c not in db_columns)
+        if not new_columns:
+            return
+        sql = """
+            ALTER TABLE {table_name}
+            {columns_sql} 
+        """.format(
+            table_name=self.name,
+            columns_sql=self.add_columns_sql(new_columns),
+        )
+        with self.connection.cursor() as c:
+            c.execute(sql)
 
     def insert(self):
         sql = """
@@ -51,6 +52,9 @@ class Processor:
 
     def columns_types_sql(self):
         return ",".join([c + " VARCHAR" for c in self.columns])
+
+    def add_columns_sql(self, columns):
+        return ",".join(["ADD COLUMN " + c + " VARCHAR" for c in columns])
 
     def column_type_sql(self, column):
         return column + " VARCHAR"
