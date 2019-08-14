@@ -28,7 +28,7 @@ class CSVProvider:
         self.csv_file.seek(0)
         reader = csv.reader(self.csv_file)
         next(reader, None)
-        self.rows_cache = tuple(tuple(row) for row in reader)
+        self.rows_cache = tuple(tuple(convert_type(r) for r in row) for row in reader)
         return self.rows_cache
 
 
@@ -69,3 +69,17 @@ def detect_type(value):
         pass
 
     return "str"
+
+
+def convert_type(value):
+    try:
+        return int(value)
+    except ValueError:
+        pass
+
+    try:
+        return int(datetime.strptime(value, '%Y-%m-%dT%H:%M:%S').timestamp())
+    except (TypeError, ValueError):
+        pass
+
+    return value

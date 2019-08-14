@@ -1,7 +1,8 @@
 import unittest
 import psycopg2
 import settings
-from processor import Processor
+from processor import Processor, TYPE_MAP
+from datetime import datetime
 
 
 class TestDB(unittest.TestCase):
@@ -28,37 +29,37 @@ class TestDB(unittest.TestCase):
             c.execute("SELECT 1")
 
     def test_creates_table(self):
-        columns = ("banme", "mane", "lmene")
-        name = "bibia"
+        columns = (("biba", "int"), ("baba", "str"), ("buba", "datetime"))
+        name = "database"
         proc = Processor(self.conn, name, columns, [])
         proc.create()
         with self.conn.cursor() as c:
-            c.execute("SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '{}'".format(name))
+            c.execute("SELECT column_name, udt_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '{}'".format(name))
             resp_columns = c.fetchall()
-            self.assertEqual([(c,) for c in columns], resp_columns)
+            self.assertEqual([(c[0], TYPE_MAP[c[1]].lower()) for c in columns], resp_columns)
 
-    def test_no_columns(self):
-        columns = ("banme", "mane", "lmene")
-        name = "bibia"
+    def test_adds_new_columns_if_not_exist(self):
+        columns = (("biba", "int"), ("baba", "str"), ("buba", "datetime"))
+        name = "database"
         proc = Processor(self.conn, name, columns, [])
         proc.create()
 
-        columns = columns + ("new",)
+        columns = columns + (("new", "int"),)
         proc = Processor(self.conn, name, columns, [])
         proc.create()
         with self.conn.cursor() as c:
-            c.execute("SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '{}'".format(name))
+            c.execute("SELECT column_name, udt_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '{}'".format(name))
             resp_columns = c.fetchall()
-            self.assertEqual([(c,) for c in columns], resp_columns)
+            self.assertEqual([(c[0], TYPE_MAP[c[1]].lower()) for c in columns], resp_columns)
 
     def test_fills_data(self):
-        columns = ("banme", "mane", "lmene")
-        name = "bibia"
-        rows = ("bobo1", "baba1", "bebe1"), ("bobo2", "baba2", "bebe2"), ("bobo3", "baba3", "bebe3")
+        columns = (("biba", "int"), ("baba", "str"), ("buba", "datetime"))
+        name = "database"
+        rows = ("111", "sss", "2016-06-22T19:10:25"), ("123", "asd", '2016-06-22T19:10:25')
         proc = Processor(self.conn, name, columns, rows)
         proc.create()
         proc.insert()
         with self.conn.cursor() as c:
             c.execute("SELECT * FROM {}".format(name))
             resp = c.fetchall()
-            self.assertEqual([r for r in rows], resp)
+            self.assertEqual([(int(r[0]), r[1], datetime.strptime(r[2], '%Y-%m-%dT%H:%M:%S')) for r in rows], resp)

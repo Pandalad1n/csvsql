@@ -13,7 +13,7 @@ class TestCSVProvider(unittest.TestCase):
 """)
         prov = CSVProvider(csv_file)
         self.assertEqual((("biba", "int"), ("baba", "str"), ("buba", "datetime")), prov.columns())
-        self.assertEqual((("111", "sss", "1997-08-23T14:20:22"), ("123", "asd", "1987-02-22T13:10:22")), prov.rows())
+        self.assertEqual(((111, "sss", 872346022.0), (123, "asd", 540997822.0)), prov.rows())
 
 
 class TestXlsxProvider(unittest.TestCase):
