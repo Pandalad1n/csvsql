@@ -1,5 +1,6 @@
 import csv
 import openpyxl
+from datetime import datetime
 
 
 class CSVProvider:
@@ -12,14 +13,21 @@ class CSVProvider:
         if self.columns_cache:
             return self.columns_cache
         reader = csv.reader(self.csv_file)
-        self.columns_cache = tuple(next(reader, None))
+        column_names = tuple(next(reader, None))
+        row = tuple(next(reader, None))
+        result = []
+        for i, name in enumerate(column_names):
+            result.append((name, detect_type(row[i])))
+        self.columns_cache = tuple(result)
         return self.columns_cache
 
     def rows(self):
         self.columns()
         if self.rows_cache:
             return self.rows_cache
+        self.csv_file.seek(0)
         reader = csv.reader(self.csv_file)
+        next(reader, None)
         self.rows_cache = tuple(tuple(row) for row in reader)
         return self.rows_cache
 
@@ -45,3 +53,19 @@ class XlsxProvider:
         next(rows)
         self.rows_cache = tuple(tuple(v.value for v in r) for r in rows)
         return self.rows_cache
+
+
+def detect_type(value):
+    try:
+        int(value)
+        return "int"
+    except ValueError:
+        pass
+
+    try:
+        datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
+        return "datetime"
+    except (TypeError, ValueError):
+        pass
+
+    return "str"

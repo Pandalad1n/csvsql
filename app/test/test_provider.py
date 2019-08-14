@@ -3,16 +3,17 @@ import unittest
 import io
 from openpyxl import Workbook
 
+
 class TestCSVProvider(unittest.TestCase):
     def test_data(self):
         csv_file = io.StringIO(
 """biba,baba,buba
-ttt,111,2222
-sss,333,4444
+111,sss,1997-08-23T14:20:22
+123,asd,1987-02-22T13:10:22
 """)
         prov = CSVProvider(csv_file)
-        self.assertEqual(("biba", "baba", "buba"), prov.columns())
-        self.assertEqual((("ttt", "111", "2222"), ("sss", "333", "4444")), prov.rows())
+        self.assertEqual((("biba", "int"), ("baba", "str"), ("buba", "datetime")), prov.columns())
+        self.assertEqual((("111", "sss", "1997-08-23T14:20:22"), ("123", "asd", "1987-02-22T13:10:22")), prov.rows())
 
 
 class TestXlsxProvider(unittest.TestCase):
