@@ -5,11 +5,17 @@ from datetime import datetime
 
 class CSVProvider:
     def __init__(self, csv_file):
+        """
+        :param csv_file: File descriptor to read from.
+        """
         self.csv_file = csv_file
         self.columns_cache = None
         self.rows_cache = None
 
     def columns(self):
+        """
+        :return column names with types
+        """
         if self.columns_cache:
             return self.columns_cache
         reader = csv.reader(self.csv_file)
@@ -22,6 +28,9 @@ class CSVProvider:
         return self.columns_cache
 
     def rows(self):
+        """
+        :return rows and converts types
+        """
         self.columns()
         if self.rows_cache:
             return self.rows_cache
@@ -34,11 +43,17 @@ class CSVProvider:
 
 class XlsxProvider:
     def __init__(self, xlsx_file):
+        """
+        :param xlsx_file: File descriptor to read from.
+        """
         self.columns_cache = None
         self.rows_cache = None
         self.book = openpyxl.load_workbook(xlsx_file)
 
     def columns(self):
+        """
+        :return column names with types
+        """
         if self.columns_cache:
             return self.columns_cache
         sheet = self.book.active
@@ -52,6 +67,9 @@ class XlsxProvider:
         return self.columns_cache
 
     def rows(self):
+        """
+        :return rows and converts types
+        """
         if self.rows_cache:
             return self.rows_cache
         sheet = self.book.active

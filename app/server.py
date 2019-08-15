@@ -12,6 +12,7 @@ app = Flask(__name__)
 def upload(table_name):
     resp = Response()
     if settings.DEBUG:
+        # add access control headers for local development
         resp.headers['Access-Control-Allow-Origin'] = '*'
         resp.headers['Access-Control-Allow-Headers'] = '*'
 
