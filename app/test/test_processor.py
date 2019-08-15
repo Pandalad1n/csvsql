@@ -65,7 +65,7 @@ class TestDB(unittest.TestCase):
     def test_fills_data(self):
         columns = (("biba", "int"), ("baba", "str"), ("buba", "datetime"))
         name = "database"
-        rows = ("111", "sss", "2016-06-22T19:10:25"), ("123", "asd", '2016-06-22T19:10:25')
+        rows = [(111, "sss", datetime(2016, 6, 22, 19, 10, 25)), (123, "asd", datetime(2012, 6, 22, 11, 10, 28))]
         proc = Processor(self.conn, name, columns, rows)
         proc.create()
         proc.insert()
@@ -76,4 +76,4 @@ class TestDB(unittest.TestCase):
             """ % (name,)
             c.execute(sql)
             resp = c.fetchall()
-            self.assertEqual([(int(r[0]), r[1], datetime.strptime(r[2], '%Y-%m-%dT%H:%M:%S')) for r in rows], resp)
+            self.assertEqual(rows, resp)
