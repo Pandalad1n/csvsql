@@ -1,3 +1,5 @@
+from psycopg2 import sql as sql_format
+
 TYPE_MAP = {
     "str": "VARCHAR",
     "int": "INT4",
@@ -13,39 +15,57 @@ class Processor:
         self.connection = connection
 
     def create(self):
+        sql = """
+            CREATE TABLE IF NOT EXISTS {} ({});
+        """.format('{}', ','.join('{} ' + TYPE_MAP[c[1]] for c in self.columns))
+        query = sql_format.SQL(sql)
+        with self.connection.cursor() as c:
+            c.execute(query.format(sql_format.Identifier(self.name), *[sql_format.Identifier(c[0]) for c in self.columns]))
 
         sql = """
-            CREATE TABLE IF NOT EXISTS %s (%s);
-        """ % (self.name, self.columns_types_sql())
-
+            SELECT column_name
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE table_name = {}
+        """
+        query = sql_format.SQL(sql)
         with self.connection.cursor() as c:
-            c.execute(sql)
-
-        sql = """
-            SELECT column_name 
-            FROM INFORMATION_SCHEMA.COLUMNS 
-            WHERE table_name = '%s'
-        """ % (self.name,)
-        with self.connection.cursor() as c:
-            c.execute(sql)
+            c.execute(query.format(sql_format.Literal(self.name)))
             db_columns = {c[0] for c in c.fetchall()}
         new_columns = tuple(c for c in self.columns if c[0] not in db_columns)
         if not new_columns:
             return
         sql = """
-            ALTER TABLE %s
-            %s
-        """ % (self.name, self.add_columns_sql(new_columns))
+            ALTER TABLE {{}}
+            {}
+        """.format(",".join("ADD COLUMN {} " + TYPE_MAP[c[1]] for c in new_columns))
+        query = sql_format.SQL(sql)
         with self.connection.cursor() as c:
-            c.execute(sql)
+            c.execute(query.format(sql_format.Identifier(self.name), *[sql_format.Identifier(c[0]) for c in new_columns]))
 
     def insert(self):
+        rows = []
+        for row in self.rows:
+            vals = ["{}" for _ in row]
+            rows.append('(' + ",".join(vals) + ')')
+        val_template = ",".join(rows)
+
+        vals = []
+        for row in self.rows:
+            for val in row:
+                vals.append(sql_format.Literal(val))
+
         sql = """
-            INSERT INTO %s (%s)
-            VALUES %s;
-        """ % (self.name, self.columns_sql(), self.rows_sql())
+            INSERT INTO {{}} ({})
+            VALUES {};
+        """.format(",".join("{}" for _ in self.columns), val_template)
+        query = sql_format.SQL(sql)
+
         with self.connection.cursor() as c:
-            c.execute(sql)
+            c.execute(query.format(
+                sql_format.Identifier(self.name),
+                *[sql_format.Identifier(c[0]) for c in self.columns],
+                *vals,
+            ))
 
     def columns_types_sql(self):
         return ",".join([self.column_type_sql(c) for c in self.columns])
