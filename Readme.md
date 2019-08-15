@@ -1,5 +1,5 @@
 
-#Table from csv or xlsx 
+# Table from csv or xlsx 
 Microservice that accepts csv or xlsx file and creates table in DB.
 Automatically determines column types.
 
