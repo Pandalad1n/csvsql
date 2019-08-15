@@ -42,7 +42,13 @@ class XlsxProvider:
         if self.columns_cache:
             return self.columns_cache
         sheet = self.book.active
-        self.columns_cache = tuple(v.value for v in next(sheet.rows))
+        rows = sheet.rows
+        column_names = tuple(next(rows, None))
+        row = tuple(next(rows, None))
+        result = []
+        for i, name in enumerate(column_names):
+            result.append((name.value, detect_type(row[i].value)))
+        self.columns_cache = tuple(result)
         return self.columns_cache
 
     def rows(self):
@@ -51,7 +57,7 @@ class XlsxProvider:
         sheet = self.book.active
         rows = sheet.rows
         next(rows)
-        self.rows_cache = tuple(tuple(v.value for v in r) for r in rows)
+        self.rows_cache = tuple(tuple(convert_type(v.value) for v in r) for r in rows)
         return self.rows_cache
 
 
@@ -63,7 +69,7 @@ def detect_type(value):
         pass
 
     try:
-        datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
+        datetime.fromisoformat(value)
         return "datetime"
     except (TypeError, ValueError):
         pass
@@ -78,7 +84,7 @@ def convert_type(value):
         pass
 
     try:
-        return int(datetime.strptime(value, '%Y-%m-%dT%H:%M:%S').timestamp())
+        return datetime.fromisoformat(value)
     except (TypeError, ValueError):
         pass
 
