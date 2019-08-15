@@ -15,19 +15,17 @@ class Processor:
     def create(self):
 
         sql = """
-            CREATE TABLE IF NOT EXISTS {table_name} ({columns_sql});
-        """.format(
-            table_name=self.name,
-            columns_sql=self.columns_types_sql(),
-        )
+            CREATE TABLE IF NOT EXISTS %s (%s);
+        """ % (self.name, self.columns_types_sql())
+
         with self.connection.cursor() as c:
             c.execute(sql)
 
         sql = """
             SELECT column_name 
             FROM INFORMATION_SCHEMA.COLUMNS 
-            WHERE table_name = '{}'
-        """.format(self.name)
+            WHERE table_name = '%s'
+        """ % (self.name,)
         with self.connection.cursor() as c:
             c.execute(sql)
             db_columns = {c[0] for c in c.fetchall()}
@@ -35,24 +33,17 @@ class Processor:
         if not new_columns:
             return
         sql = """
-            ALTER TABLE {table_name}
-            {columns_sql} 
-        """.format(
-            table_name=self.name,
-            columns_sql=self.add_columns_sql(new_columns),
-        )
+            ALTER TABLE %s
+            %s
+        """ % (self.name, self.add_columns_sql(new_columns))
         with self.connection.cursor() as c:
             c.execute(sql)
 
     def insert(self):
         sql = """
-            INSERT INTO {table_name} ({columns})
-            VALUES {rows};
-        """.format(
-            table_name=self.name,
-            columns=self.columns_sql(),
-            rows=self.rows_sql(),
-        )
+            INSERT INTO %s (%s)
+            VALUES %s;
+        """ % (self.name, self.columns_sql(), self.rows_sql())
         with self.connection.cursor() as c:
             c.execute(sql)
 

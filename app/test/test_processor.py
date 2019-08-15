@@ -34,7 +34,12 @@ class TestDB(unittest.TestCase):
         proc = Processor(self.conn, name, columns, [])
         proc.create()
         with self.conn.cursor() as c:
-            c.execute("SELECT column_name, udt_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '{}'".format(name))
+            sql = """
+            SELECT column_name, udt_name 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE table_name = '%s'
+            """ % (name,)
+            c.execute(sql)
             resp_columns = c.fetchall()
             self.assertEqual([(c[0], TYPE_MAP[c[1]].lower()) for c in columns], resp_columns)
 
@@ -48,7 +53,12 @@ class TestDB(unittest.TestCase):
         proc = Processor(self.conn, name, columns, [])
         proc.create()
         with self.conn.cursor() as c:
-            c.execute("SELECT column_name, udt_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '{}'".format(name))
+            sql = """
+            SELECT column_name, udt_name 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE table_name = '%s'
+            """ % (name,)
+            c.execute(sql)
             resp_columns = c.fetchall()
             self.assertEqual([(c[0], TYPE_MAP[c[1]].lower()) for c in columns], resp_columns)
 
@@ -60,6 +70,10 @@ class TestDB(unittest.TestCase):
         proc.create()
         proc.insert()
         with self.conn.cursor() as c:
-            c.execute("SELECT * FROM {}".format(name))
+            sql = """
+            SELECT * 
+            FROM %s
+            """ % (name,)
+            c.execute(sql)
             resp = c.fetchall()
             self.assertEqual([(int(r[0]), r[1], datetime.strptime(r[2], '%Y-%m-%dT%H:%M:%S')) for r in rows], resp)
