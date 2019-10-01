@@ -27,12 +27,12 @@ class TestXlsxProvider(unittest.TestCase):
         sheet = book.active
         file = io.BytesIO()
 
-        sheet.append(['biba', 'baba', 'buba'])
+        sheet.append(['jojo', 'speedwagon', 'kakoyoin'])
         sheet.append([111, 'sss', datetime(2016, 6, 22, 19, 10, 25).isoformat()])
         sheet.append([123, 'baba', datetime(2012, 6, 22, 11, 10, 28).isoformat()])
 
         book.save(file)
 
         prov = XlsxProvider(file)
-        self.assertEqual((("biba", "int"), ("baba", "str"), ("buba", "datetime")), prov.columns())
+        self.assertEqual((("jojo", "int"), ("speedwagon", "str"), ("kakoyoin", "datetime")), prov.columns())
         self.assertEqual(((111, "sss", datetime(2016, 6, 22, 19, 10, 25)), (123, "baba", datetime(2012, 6, 22, 11, 10, 28))), prov.rows())
